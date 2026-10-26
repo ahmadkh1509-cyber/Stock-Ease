@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "452253394996",
+    "project_id": "stockease-flutter-stockease",
+    "storage_bucket": "stockease-flutter-stockease.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:452253394996:android:a7ee3e26e71fab236e8261",
+        "android_client_info": {
+          "package_name": "com.example.stock_ease"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBW-95w0zUvSe3s1mHPnHoRNqpd4IZZonk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
