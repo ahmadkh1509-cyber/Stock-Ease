@@ -3,26 +3,33 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../core/constantscolors.dart';
 import '../../services/auth_provider.dart';
-import '../../services/dash_board_provider.dart';
+import '../../services/product_provider.dart';
+import '../../services/transaction_provider.dart';
 import '../../widgets/low_stock_tile.dart';
 import '../../widgets/quick_action_button.dart';
 import '../../widgets/sales_hero_card.dart';
 import '../../widgets/stat_cards.dart';
-import '../../services/product_provider.dart';
 import '../products/product_list_screen.dart';
+import '../stock/stock_movement_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
+  void _openStock(BuildContext context, {required bool isIn}) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => StockMovementScreen(isIn: isIn)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final products = context.watch<ProductProvider>();
-    final lowStock = products.lowStock;
     final user = context.watch<AuthProvider>().user;
-    final data = context.watch<DashboardProvider>();
+    final products = context.watch<ProductProvider>();
+    final stats = context.watch<TransactionProvider>();
+    final lowStock = products.lowStock;
     final money = NumberFormat('#,##0');
 
-    // First name only, falls back to "there" if no name is saved
     final firstName = (user?.displayName ?? '').trim().split(' ').first;
     final name = firstName.isEmpty ? 'there' : firstName;
 
@@ -33,7 +40,6 @@ class DashboardScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ---------- Header ----------
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -68,15 +74,13 @@ class DashboardScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // ---------- Hero card ----------
               SalesHeroCard(
-                sales: data.todaySales,
-                growthPercent: data.growthPercent,
-                weeklySales: data.weeklySales,
+                sales: stats.todaySales,
+                growthPercent: stats.growthPercent,
+                weeklySales: stats.weeklySales,
               ),
               const SizedBox(height: 16),
 
-              // ---------- 2x2 stat cards ----------
               Row(
                 children: [
                   Expanded(
@@ -104,7 +108,7 @@ class DashboardScreen extends StatelessWidget {
                     child: StatCard(
                       icon: Icons.shopping_bag_outlined,
                       label: 'Items sold',
-                      value: '${data.itemsSold}',
+                      value: '${stats.itemsSoldToday}',
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -112,7 +116,7 @@ class DashboardScreen extends StatelessWidget {
                     child: StatCard(
                       icon: Icons.trending_up_rounded,
                       label: 'Profit',
-                      value: 'Rs ${money.format(data.todayProfit)}',
+                      value: 'Rs ${money.format(stats.todayProfit)}',
                     ),
                   ),
                 ],
@@ -135,9 +139,7 @@ class DashboardScreen extends StatelessWidget {
                     child: QuickActionButton(
                       icon: Icons.south_west_rounded,
                       label: 'Stock in',
-                      onTap: () {
-                        // TODO: open Stock In screen
-                      },
+                      onTap: () => _openStock(context, isIn: true),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -145,9 +147,7 @@ class DashboardScreen extends StatelessWidget {
                     child: QuickActionButton(
                       icon: Icons.north_east_rounded,
                       label: 'Stock out',
-                      onTap: () {
-                        // TODO: open Stock Out screen
-                      },
+                      onTap: () => _openStock(context, isIn: false),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -155,16 +155,13 @@ class DashboardScreen extends StatelessWidget {
                     child: QuickActionButton(
                       icon: Icons.qr_code_scanner_rounded,
                       label: 'Scan',
-                      onTap: () {
-                        // TODO: open Barcode Scanner screen
-                      },
+                      onTap: () {},
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 24),
 
-              // ---------- Low stock list ----------
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -177,17 +174,14 @@ class DashboardScreen extends StatelessWidget {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const ProductListScreen(
-                            initialLowStockOnly: true,
-                          ),
-                        ),
-                      );
-                    },
-                    child: (Text("see all")),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const ProductListScreen(initialLowStockOnly: true),
+                      ),
+                    ),
+                    child: const Text('See all'),
                   ),
                 ],
               ),
@@ -201,7 +195,6 @@ class DashboardScreen extends StatelessWidget {
                   ),
                 )
               else
-                // Show only the first 3 on the dashboard
                 ...lowStock
                     .take(3)
                     .map(

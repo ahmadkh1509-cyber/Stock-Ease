@@ -7,6 +7,7 @@ import 'services/auth_provider.dart';
 import 'screens/auth/auth_wrapper.dart';
 import 'services/dash_board_provider.dart';
 import 'services/product_provider.dart';
+import 'services/transaction_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,10 +23,13 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => DashboardProvider()),
         ChangeNotifierProxyProvider<AuthProvider, ProductProvider>(
           create: (_) => ProductProvider(),
           update: (_, auth, product) => product!..updateUser(auth.user?.uid),
+        ),
+        ChangeNotifierProxyProvider<AuthProvider, TransactionProvider>(
+          create: (_) => TransactionProvider(),
+          update: (_, auth, tx) => tx!..updateUser(auth.user?.uid),
         ),
       ],
       child: MaterialApp(
